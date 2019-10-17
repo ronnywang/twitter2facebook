@@ -27,7 +27,8 @@ Sync Twitter's timeline to Facebook's without Facebook API by posting to `mbasic
     1. docker exec c-twitter2facebook env PYTHONIOENCODING=utf-8 python3 /srv/twitter2facebook/twitter2facebook.py
     2. (check if your tweets sync to facebook)
     3. (add the command to your crontab)
-       * * * * * root docker exec c-twitter2facebook env PYTHONIOENCODING=utf-8 python3 /srv/twitter2facebook/twitter2facebook.py
+
+```* * * * * root docker exec c-twitter2facebook env PYTHONIOENCODING=utf-8 python3 /srv/twitter2facebook/twitter2facebook.py ```
 
 # License
 
