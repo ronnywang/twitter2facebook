@@ -29,7 +29,7 @@ def post(text):
         t = b.find_element_by_css_selector('#mbasic_inline_feed_composer textarea')
         t.send_keys(text)
 
-        btn = b.find_element_by_css_selector('#mbasic_inline_feed_composer input[value="Post"]')
+        btn = b.find_element_by_css_selector('#mbasic_inline_feed_composer input[name="view_post"]')
         btn.click()
 
 def work():
