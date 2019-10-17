@@ -2,57 +2,32 @@
 
 Sync Twitter's timeline to Facebook's without Facebook API by posting to `mbasic.facebook.com`.
 
-This is developed and tested in Ubuntu 18.04 only.
-
-# Pre-installation
-
-Install these packages first:
-
-* chromium-browser
-* chromium-chromedriver
-
-And create symbolic link for chromedriver:
-
-    ln -s ../lib/chromium-browser/chromedriver /usr/bin/chromedriver
-
-Then login Facebook and keep cookies.
-
-# Workaround on Chromium
-
-Chrome cannot use cookies in headless mode with latest version (now it's 71), so you need the workaround to install old version, and avoid from upgrading:
-
-    apt-cache showpkg chromium-browser
-    sudo apt install \
-        chromium-browser=65.0.3325.181-0ubuntu1 \
-        chromium-chromedriver=65.0.3325.181-0ubuntu1 \
-        chromium-codecs-ffmpeg=65.0.3325.181-0ubuntu1
-    sudo apt-mark hold chromium-browser chromium-chromedriver chromium-codecs-ffmpeg
-
 # Installation
 
-Install Python 3 first (I used `pyenv` to run it), then use `pip` to install dependencies:
-
-    pip install -r requirements.txt
-
-Setup Twitter's key & secret in `~/.config/twitter2facebook/config.ini`:
-
-    [default]
-    sentry_sdk_url = https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@sentry.io/yyyyyyy
-    twitter_access_token_key = x-x
-    twitter_access_token_secret = x
-    twitter_consumer_key = x
-    twitter_consumer_secret = x
-    twitter_username = xxx
-
-Use `sqlite3` to create table schema in `~/.config/twitter2facebook/entry.sqlite3`:
-
-    CREATE TABLE entry (id INTEGER PRIMARY KEY AUTOINCREMENT, twitter_id TEXT UNIQUE, created_at INTEGER);
-
-# Crontab
-
-When using pyenv, you might need to specify pyenv to run this script:
-
-    LANG=en_US.UTF-8 ~/.pyenv/shims/python3 /path/twitter2facebook/twitter2facebook.py
+* On your server (any OS with docker & git installed)
+    1. git clone https://github.com/ronnywang/twitter2facebook
+    2. cd twitter2facebook/
+    3. cp config.sample.ini config.ini
+    4. (Edit config.ini)
+       * https://developer.twitter.com/en.html
+       * https://sentry.io
+    5. docker build . -t twitter2facebook
+    6. docker create --publish 127.0.0.1:10022:22 -t -i --name c-twitter2facebook twitter2facebook
+    7. docker start c-twitter2facebook
+    8. (Configure ssh login)
+       * docker cp your-public-key-file c-twitter2facebook:/root/.ssh/authorized_keys
+       * docker exec c-twitter2facebook chown root:root /root/.ssh/authorized_keys
+* On your desktop
+    1. ssh your-server -L10022:localhost:10022
+    2. ssh root@localhost -p 10022 -i your-private-key-file -Y
+       * chromium-browser --no-sandbox --disable-gpu --user-data-dir=/root/.config/chromium https://facebook.com/
+       * (login your facebook account in the browser)
+    3. disconnect 
+* On your server
+    1. docker exec c-twitter2facebook env PYTHONIOENCODING=utf-8 python3 /srv/twitter2facebook/twitter2facebook.py
+    2. (check if your tweets sync to facebook)
+    3. (add the command to your crontab)
+       * * * * * root docker exec c-twitter2facebook env PYTHONIOENCODING=utf-8 python3 /srv/twitter2facebook/twitter2facebook.py
 
 # License
 
