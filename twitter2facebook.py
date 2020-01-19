@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import configparser
+import html
 import os
 import selenium
 import selenium.webdriver.chrome.options
@@ -40,8 +41,9 @@ def work():
     c = configparser.ConfigParser()
     c.read(f_conf)
 
-    sentry_sdk_url = c['default']['sentry_sdk_url']
-    sentry_sdk.init(sentry_sdk_url)
+    if 'sentry_sdk_url' in c['default'] and '' != c['default']['sentry_sdk_url']:
+        sentry_sdk_url = c['default']['sentry_sdk_url']
+        sentry_sdk.init(sentry_sdk_url)
 
     t_ak = c['default']['twitter_access_token_key']
     t_as = c['default']['twitter_access_token_secret']
@@ -56,8 +58,8 @@ def work():
     sql_select = 'SELECT COUNT(*) FROM entry WHERE twitter_id = ?;'
 
     for status in sorted(list(t.GetUserTimeline(screen_name=t_user)), key=lambda x: x.id):
-        # Generate "text"
-        text = status.text
+        # Generate "text" with unescape (workaround).
+        text = html.unescape(status.text)
         for u in status.urls:
             text = text.replace(u.url, u.expanded_url)
 
